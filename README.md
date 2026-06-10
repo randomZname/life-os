@@ -13,6 +13,13 @@ Google Calendar, Gmail drafts, Obsidian notes, personal CRM, finances, habits).
 **Stack:** Python 3.12 · Pydantic AI · LiteLLM proxy · PostgreSQL + pgvector ·
 python-telegram-bot · FastAPI · Playwright · Docker Compose
 
+![BogiAgent dashboard](docs/img/dashboard.png)
+
+*The web dashboard (live UI, demo data): chat with the agent on the left, HUD
+panels on the right — today's agenda + Moodle deadlines, finances, habits,
+people follow-ups, web monitors and capture inbox. Screenshot is reproducible
+via `scripts/screenshot_dashboard.py` (mocked API, no real data).*
+
 ---
 
 ## What it does
