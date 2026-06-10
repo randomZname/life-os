@@ -1,0 +1,91 @@
+# LiteLLM proxy configuration
+# Bogi говори ВИНАГИ с този proxy на localhost:4000.
+# В кода НИКОГА не пишеш конкретен модел — само alias (cheap/smart/premium).
+
+model_list:
+  # =============================================================
+  # PRIMARY: Anthropic Claude (Haiku/Sonnet/Opus) през OAuth token
+  # ANTHROPIC_API_KEY се попълва от .env.
+  # Ползва claude.ai Pro абонамент — без допълнителни разходи.
+  # =============================================================
+
+  - model_name: cheap
+    litellm_params:
+      model: anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: smart
+    litellm_params:
+      model: anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  - model_name: premium
+    litellm_params:
+      model: anthropic/claude-haiku-4-5-20251001
+      api_key: os.environ/ANTHROPIC_API_KEY
+
+  # =============================================================
+  # FALLBACK: OpenAI — активира се само ако primary дава 401/429/5xx
+  # или provider е unavailable. Виж `litellm_settings.fallbacks`.
+  # OPENAI_API_KEY трябва да е попълнен в .env.
+  # =============================================================
+
+  - model_name: cheap_openai
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: smart_openai
+    litellm_params:
+      model: openai/gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: premium_openai
+    litellm_params:
+      model: openai/gpt-4o
+      api_key: os.environ/OPENAI_API_KEY
+
+  # =============================================================
+  # ACTIVE FALLBACK: OpenRouter (OPENROUTER_API_KEY е попълнен; OpenAI не е).
+  # Активира се ако Anthropic primary падне / свършат токени. Reliable
+  # free-tier NVIDIA модели липсваха (429/404), затова cheap+reliable Mistral.
+  # =============================================================
+
+  - model_name: cheap_or
+    litellm_params:
+      model: openrouter/mistralai/mistral-small-3.2-24b-instruct
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: smart_or
+    litellm_params:
+      model: openrouter/mistralai/mistral-small-3.2-24b-instruct
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: premium_or
+    litellm_params:
+      model: openrouter/mistralai/mistral-small-3.2-24b-instruct
+      api_key: os.environ/OPENROUTER_API_KEY
+
+litellm_settings:
+  drop_params: true
+  set_verbose: false
+  json_logs: true
+  cache: false
+  max_budget: 100
+  budget_duration: 30d
+
+  # Fallback routing: при 401/429/5xx на Anthropic (или свършени токени) →
+  # автоматично OpenRouter (Mistral), после OpenAI ако някога има ключ.
+  # LiteLLM лог-ва `model` field в response → виждаш кой реално е отговорил.
+  fallbacks:
+    - cheap:    [cheap_or, cheap_openai]
+    - smart:    [smart_or, smart_openai]
+    - premium:  [premium_or, premium_openai]
+
+  context_window_fallbacks:
+    - smart:    [premium, smart_or]
+    - premium:  [premium_or, smart_or]
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  enforce_user_param: false
