@@ -1,0 +1,90 @@
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.venv/
+venv/
+env/
+ENV/
+
+# Testing
+.pytest_cache/
+.coverage
+.hypothesis/
+htmlcov/
+
+# Tools
+.mypy_cache/
+.ruff_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project data — runtime/user content, never commit (red line).
+# The pre-commit hook (D-011) blocks any data/ path, so dirs are recreated at
+# runtime, not tracked via .gitkeep.
+data/
+data/sandbox/
+data/inbox/
+data/processed/
+data/exports/
+data/browser_profiles/
+data/gcal/
+data/runtime/
+data/files/
+
+# Claude Code local (machine-specific / generated, never commit)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# Vault — user content, never commit
+vault/*
+!vault/.gitkeep
+!vault/README.md
+
+# Postgres / Docker volumes
+postgres_data/
+litellm_logs/
+
+# Logs
+*.log
+*.log.*
+logs/
+
+# Playwright
+.playwright/
+playwright-report/
+
+# Local model cache (sentence-transformers downloads here)
+.cache/
+~/.cache/
+models_cache/

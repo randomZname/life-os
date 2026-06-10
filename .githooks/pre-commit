@@ -1,0 +1,13 @@
+#!/bin/sh
+# BogiAgent pre-commit hook.
+# Blocks staged Tier-3 files (secrets/.env/data/vault/local settings/keys) and
+# context-pack drift. Bypass with: git commit --no-verify
+# Enable: git config core.hooksPath .githooks
+if command -v python >/dev/null 2>&1; then
+  python .githooks/precommit_check.py
+elif command -v py >/dev/null 2>&1; then
+  py -3 .githooks/precommit_check.py
+else
+  echo "pre-commit: python not on PATH - skipping checks (install python or --no-verify)"
+  exit 0
+fi
