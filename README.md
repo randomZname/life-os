@@ -1,6 +1,6 @@
-# BogiAgent
+# J.A.R.V.I.S. — Personal Life-OS
 
-A personal AI assistant ("Jarvis") for a university student — built as a single
+A personal AI assistant for a university student — built as a single
 integrated system: Telegram bot + web dashboard front-ends, a tool-using LLM
 agent in the middle, and real integrations behind it (university Moodle,
 Google Calendar, Gmail drafts, Obsidian notes, personal CRM, finances, habits).
@@ -13,7 +13,7 @@ Google Calendar, Gmail drafts, Obsidian notes, personal CRM, finances, habits).
 **Stack:** Python 3.12 · Pydantic AI · LiteLLM proxy · PostgreSQL + pgvector ·
 python-telegram-bot · FastAPI · Playwright · Docker Compose
 
-![BogiAgent dashboard](docs/img/dashboard.png)
+![JARVIS dashboard](docs/img/dashboard.png)
 
 *The web dashboard (live UI, demo data): chat with the agent on the left, HUD
 panels on the right — today's agenda + Moodle deadlines, finances, habits,
