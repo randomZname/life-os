@@ -5,7 +5,7 @@ description = "BogiAgent — personal AI assistant for FMI workflow"
 readme = "README.md"
 requires-python = ">=3.12"
 authors = [
-    { name = "Bogdan", email = "" },
+    { name = "Bogdan", email = "bogdan.mstefanov@gmail.com" },
 ]
 dependencies = [
     # Agent framework
