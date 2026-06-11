@@ -13,6 +13,8 @@ Google Calendar, Gmail drafts, Obsidian notes, personal CRM, finances, habits).
 **Stack:** Python 3.12 · Pydantic AI · LiteLLM proxy · PostgreSQL + pgvector ·
 python-telegram-bot · FastAPI · Playwright · Docker Compose
 
+### ▶ [Live demo](https://randomzname.github.io/life-os/) — the real dashboard UI running on fictional data (static build, no backend; try asking it about exams, money or memory)
+
 ![JARVIS dashboard](docs/img/dashboard.png)
 
 *The web dashboard (live UI, demo data): chat with the agent on the left, HUD
