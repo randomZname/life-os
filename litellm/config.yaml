@@ -6,7 +6,7 @@ model_list:
   # =============================================================
   # PRIMARY: Anthropic Claude (Haiku/Sonnet/Opus) през OAuth token
   # ANTHROPIC_API_KEY се попълва от .env.
-  # Ползва claude.ai Pro абонамент — без допълнителни разходи.
+  # Ключът идва от .env (ANTHROPIC_API_KEY).
   # =============================================================
 
   - model_name: cheap

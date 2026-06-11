@@ -8,7 +8,8 @@ Google Calendar, Gmail drafts, Obsidian notes, personal CRM, finances, habits).
 > **Note:** this is a sanitized public snapshot of an actively developed
 > private project (100+ conventional commits). Personal data, runtime state and
 > the full git history stay private — access to the private repo available on
-> request.
+> request. The product speaks Bulgarian to its user (it is built for one);
+> the docs and the live demo are in English.
 
 **Stack:** Python 3.12 · Pydantic AI · LiteLLM proxy · PostgreSQL + pgvector ·
 python-telegram-bot · FastAPI · Playwright · Docker Compose
