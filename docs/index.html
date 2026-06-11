@@ -262,14 +262,14 @@
       <div class="chat">
         <div class="messages" id="messages"></div>
         <div class="chips" id="chips">
-          <span class="chip">Какво имам днес?</span>
-          <span class="chip">Колко уроци изкарах този месец?</span>
-          <span class="chip">Кого да потърся?</span>
-          <span class="chip">Покажи навиците</span>
-          <span class="chip">Какво има в inbox-а?</span>
+          <span class="chip">What do I have today?</span>
+          <span class="chip">How much did I earn this month?</span>
+          <span class="chip">Who should I reach out to?</span>
+          <span class="chip">Show my habits</span>
+          <span class="chip">What's in my inbox?</span>
         </div>
         <form class="composer" id="composer" autocomplete="off">
-          <input id="input" placeholder="Кажи на Джарвис..." />
+          <input id="input" placeholder="Talk to Jarvis..." />
           <button type="submit" class="send" id="sendBtn">SEND</button>
         </form>
       </div>
@@ -280,43 +280,43 @@
       <!-- SYSTEM -->
       <div class="card" data-panel="system">
         <h3><span class="t"><span class="live"></span>SYSTEM</span><span id="sysPill" class="mono-val">--</span></h3>
-        <div id="systemBody"><div class="empty">зареждане…</div></div>
+        <div id="systemBody"><div class="empty">loading…</div></div>
       </div>
 
-      <!-- ДНЕС -->
+      <!-- TODAY -->
       <div class="card span2" data-panel="today">
-        <h3><span class="t"><span class="live"></span>ДНЕС</span></h3>
-        <div id="todayBody"><div class="empty">зареждане…</div></div>
+        <h3><span class="t"><span class="live"></span>TODAY</span></h3>
+        <div id="todayBody"><div class="empty">loading…</div></div>
       </div>
 
-      <!-- ПАРИ -->
+      <!-- MONEY -->
       <div class="card" data-panel="money">
-        <h3><span class="t"><span class="live"></span>ПАРИ</span></h3>
-        <div id="moneyBody"><div class="empty">зареждане…</div></div>
+        <h3><span class="t"><span class="live"></span>MONEY</span></h3>
+        <div id="moneyBody"><div class="empty">loading…</div></div>
       </div>
 
-      <!-- НАВИЦИ -->
+      <!-- HABITS -->
       <div class="card" data-panel="habits">
-        <h3><span class="t"><span class="live"></span>НАВИЦИ</span></h3>
-        <div id="habitsBody"><div class="empty">зареждане…</div></div>
+        <h3><span class="t"><span class="live"></span>HABITS</span></h3>
+        <div id="habitsBody"><div class="empty">loading…</div></div>
       </div>
 
-      <!-- ХОРА -->
+      <!-- PEOPLE -->
       <div class="card" data-panel="people">
-        <h3><span class="t"><span class="live"></span>ХОРА</span></h3>
-        <div id="peopleBody"><div class="empty">зареждане…</div></div>
+        <h3><span class="t"><span class="live"></span>PEOPLE</span></h3>
+        <div id="peopleBody"><div class="empty">loading…</div></div>
       </div>
 
-      <!-- МОНИТОРИ -->
+      <!-- MONITORS -->
       <div class="card" data-panel="monitors">
-        <h3><span class="t"><span class="live"></span>МОНИТОРИ</span></h3>
-        <div id="monitorsBody"><div class="empty">зареждане…</div></div>
+        <h3><span class="t"><span class="live"></span>MONITORS</span></h3>
+        <div id="monitorsBody"><div class="empty">loading…</div></div>
       </div>
 
       <!-- INBOX -->
       <div class="card span2" data-panel="captures">
         <h3><span class="t"><span class="live"></span>INBOX</span><span id="inboxBadge" class="badge">0</span></h3>
-        <div id="captureBody"><div class="empty">зареждане…</div></div>
+        <div id="captureBody"><div class="empty">loading…</div></div>
       </div>
     </div>
   </section>
@@ -327,9 +327,9 @@
 <script>
 /* DEMO MODE — static GitHub Pages build. All data below is fictional. */
 (function(){
-  const DATA = {"/api/status": {"ok": true, "tools": 34, "counts": {"memories": 218, "people": 12, "captures": 3, "transactions": 57, "monitors": 2, "habits": 3, "documents": 142}}, "/api/today": {"agenda": [{"start": "2026-06-11T09:00", "summary": "Лекция — Бази данни", "event_class": "university"}, {"start": "2026-06-11T14:00", "summary": "Урок по математика", "event_class": "lesson"}, {"start": "2026-06-11T19:00", "summary": "Фитнес", "event_class": "personal"}], "deadlines": [{"kind": "assignment", "title": "Домашно 3 — нормални форми", "course": "Бази данни", "time_text": "утре, 23:59"}, {"kind": "quiz", "title": "Тест — Java колекции", "course": "ООП практикум", "time_text": "след 3 дни"}]}, "/api/money": {"month": {"currency": "лв", "income_total": 840.0, "expense_total": 412.5, "net": 427.5}, "recent": [{"amount": 60, "kind": "income", "description": "Урок — математика"}, {"amount": -45, "kind": "expense", "description": "Учебник по статистика"}, {"amount": -18.9, "kind": "expense", "description": "Обяд"}]}, "/api/habits": {"habits": [{"name": "Учене 2ч", "streak": 12, "last7": [true, true, true, true, false, true, true]}, {"name": "Фитнес", "streak": 4, "last7": [false, true, false, true, true, false, true]}, {"name": "Четене", "streak": 7, "last7": [true, true, true, true, true, true, true]}]}, "/api/people": {"birthdays": [{"name": "Мартин", "in_days": 2}], "stale": [{"name": "Виктор", "days_since": 21}]}, "/api/monitors": {"monitors": [{"name": "GPU цена — RTX 4070", "last_value": "1099 лв", "last_checked_at": "2026-06-11T08:30:00"}, {"name": "Сесия — график", "last_value": "без промяна", "last_checked_at": "2026-06-11T07:00:00"}]}, "/api/captures": {"inbox": [{"kind": "idea", "content": "Сравни pgvector срещу Qdrant за RAG"}, {"kind": "task", "content": "Запиши се за изпита по статистика"}, {"kind": "url", "content": "fastapi.tiangolo.com/advanced"}]}, "/api/brief": {"text": "Добро утро! ☀️ Днес имаш **лекция по Бази данни в 09:00** и урок в 14:00. ⏰ Домашно 3 по Бази данни е до утре 23:59 — остава ти теорията за BCNF. 🔥 12-дневна серия учене — дръж темпото."}};
-  const REPLIES = [["изпит|бази данни|повторя|научи", "Изпитът по **Бази данни** е на 24 юни, 10:00. По материалите от индекса препоръчвам да повториш: нормални форми (лекция 7), транзакции и ACID (лекция 9), индекси и B-дървета (лекция 10). Домашно 3 покрива същия материал — започни от него. Да ти направя ли план за повторение в календара?"], ["план|календар|повторение|събитие|запази", "Готово — предлагам 3 сесии за повторение: четвъртък 18:00 (нормални форми), петък 17:00 (транзакции), неделя 10:00 (индекси). Събитията са в **approval queue** — потвърди и ги записвам в Google Calendar. ✅"], ["пари(?![а-я])|разход|приход|бюджет|похарчи", "Този месец: **840 лв** приход срещу **412.50 лв** разход → **+427.50 лв** нето. Най-голям разход: учебник по статистика (45 лв). Приходът е от 7 урока по математика."], ["запомни|памет|спомни", "Записах го в дългосрочната памет (namespace `study/databases`), с dedup срещу 218-те съществуващи спомена. Ще го извадя сам, когато стане релевантно."], ["здравей|кой си|какво можеш|помощ", "Здравей! Аз съм J.A.R.V.I.S. — личен Life-OS агент с **34 инструмента**: календар, Moodle крайни срокове, RAG търсене в лекциите, финанси, навици, хора, монитори и дългосрочна памет. Питай ме нещо от панелите вдясно."]].map(([re, text]) => [new RegExp(re, 'i'), text]);
-  const DEFAULT_REPLY = "Това е **статично демо** с измислени данни — тук отговарям само на няколко теми (изпити, план, пари, памет). Истинският агент върти същия UI върху жив backend: Pydantic AI + Postgres/pgvector + Google Calendar + Moodle. Кодът е в репото. 🙂";
+  const DATA = {"/api/status": {"ok": true, "tools": 34, "counts": {"memories": 218, "people": 12, "captures": 3, "transactions": 57, "monitors": 2, "habits": 3, "documents": 142}}, "/api/today": {"agenda": [{"start": "2026-06-11T09:00", "summary": "Lecture — Databases", "event_class": "university"}, {"start": "2026-06-11T14:00", "summary": "Math tutoring session", "event_class": "lesson"}, {"start": "2026-06-11T19:00", "summary": "Gym", "event_class": "personal"}], "deadlines": [{"kind": "assignment", "title": "Homework 3 — normal forms", "course": "Databases", "time_text": "tomorrow, 23:59"}, {"kind": "quiz", "title": "Quiz — Java collections", "course": "OOP practicum", "time_text": "in 3 days"}]}, "/api/money": {"month": {"currency": "BGN", "income_total": 840.0, "expense_total": 412.5, "net": 427.5}, "recent": [{"amount": 60, "kind": "income", "description": "Tutoring — math"}, {"amount": -45, "kind": "expense", "description": "Statistics textbook"}, {"amount": -18.9, "kind": "expense", "description": "Lunch"}]}, "/api/habits": {"habits": [{"name": "Study 2h", "streak": 12, "last7": [true, true, true, true, false, true, true]}, {"name": "Gym", "streak": 4, "last7": [false, true, false, true, true, false, true]}, {"name": "Reading", "streak": 7, "last7": [true, true, true, true, true, true, true]}]}, "/api/people": {"birthdays": [{"name": "Martin", "in_days": 2}], "stale": [{"name": "Victor", "days_since": 21}]}, "/api/monitors": {"monitors": [{"name": "GPU price — RTX 4070", "last_value": "1099 BGN", "last_checked_at": "2026-06-11T08:30:00"}, {"name": "Exam session schedule", "last_value": "no change", "last_checked_at": "2026-06-11T07:00:00"}]}, "/api/captures": {"inbox": [{"kind": "idea", "content": "Compare pgvector vs Qdrant for RAG"}, {"kind": "task", "content": "Register for the Statistics exam"}, {"kind": "url", "content": "fastapi.tiangolo.com/advanced"}]}, "/api/brief": {"text": "Good morning! ☀️ Today you have a **Databases lecture at 09:00** and a tutoring session at 14:00. ⏰ Homework 3 (Databases) is due tomorrow 23:59 — the BCNF theory part is still left. 🔥 12-day study streak — keep it going."}};
+  const REPLIES = [["exam|databases?|revise|изпит|бази данни", "The **Databases** exam is on June 24, 10:00. Based on the indexed lecture notes I'd revise: normal forms (lecture 7), transactions & ACID (lecture 9), indexes & B-trees (lecture 10). Homework 3 covers the same material — start there. Want me to schedule revision sessions in your calendar?"], ["plan|calendar|schedule|revision|план|календар|повторение", "Done — proposing 3 revision sessions: Thu 18:00 (normal forms), Fri 17:00 (transactions & ACID), Sun 10:00 (indexes). They're waiting in the **approval queue** — confirm and I'll write them to Google Calendar. ✅"], ["money|earn|spen[dt]|income|expense|budget|пари(?![а-я])|разход|приход|бюджет", "This month: **840 BGN** income vs **412.50 BGN** expenses → **+427.50 BGN** net. Biggest expense: statistics textbook (45 BGN). The income comes from 7 math tutoring sessions."], ["remember|memor(y|ies)|запомни|памет", "Saved to long-term memory (namespace `study/databases`), deduplicated against the 218 existing memories. I'll surface it on my own when it becomes relevant."], ["today|agenda|днес", "Today: Databases lecture at 09:00 🎓, math tutoring at 14:00 and gym at 19:00. One deadline on the radar: **Homework 3 (Databases)** due tomorrow 23:59."], ["habit|streak|навици", "Habit check: **Study 2h** — 12-day streak 🔥, **Reading** — 7 days, **Gym** — 4 days (missed the day before yesterday). Today is still open for all three."], ["reach out|birthday|who should|потърся|рожден", "Martin's birthday is in 2 days 🎂 — worth planning something. And you haven't talked to Victor in 21 days; a quick message wouldn't hurt. 📞"], ["inbox", "3 items in the capture inbox: 💡 an idea (compare pgvector vs Qdrant for RAG), ✅ a task (register for the Statistics exam) and 🔗 a link (FastAPI advanced docs). Want me to turn the task into a calendar event?"], ["hello|\\bhi\\b|who are you|what can|здравей|кой си|какво можеш", "Hi! I'm J.A.R.V.I.S. — a personal Life-OS agent with **34 tools**: calendar, Moodle deadlines, RAG search over lecture notes, finances, habits, people follow-ups, web monitors and long-term memory. Ask me about anything you see in the panels."]].map(([re, text]) => [new RegExp(re, 'i'), text]);
+  const DEFAULT_REPLY = "This is a **static demo** with fictional data — I only answer a few topics here (exams, plans, money, habits, memory, inbox). The real agent runs this same UI on a live backend: Pydantic AI + Postgres/pgvector + Google Calendar + Moodle. The code is in the repo. 🙂";
   const json = obj => new Response(JSON.stringify(obj), {status:200, headers:{'Content-Type':'application/json'}});
   const realFetch = window.fetch.bind(window);
   window.fetch = function(path, opts){
@@ -451,12 +451,12 @@ async function sendChat(text){
     tp.remove();
     if(data && data.reply){ typeBot(data.reply); }
     else if(data && data.error){ typeBot('⚠️ '+data.error); }
-    else { typeBot('⚠️ Празен отговор.'); }
+    else { typeBot('⚠️ Empty reply.'); }
   }catch(e){
     tp.remove();
     if(e.message!=='unauthorized'){
       reactor.classList.remove('thinking'); statusTag.textContent='AWAITING COMMAND';
-      typeBot('⚠️ Връзката с агента се разпадна.');
+      typeBot('⚠️ Lost connection to the agent.');
     }
   }finally{
     busy=false; sendBtn.disabled=false;
@@ -498,7 +498,7 @@ function markStale(panel, stale){
   if(live) live.classList.toggle('stale', !!stale);
 }
 function panelError(elId, panel, msg){
-  $(elId).innerHTML='<div class="err">грешка: '+escapeHtml(msg||'няма връзка')+'</div>';
+  $(elId).innerHTML='<div class="err">error: '+escapeHtml(msg||'no connection')+'</div>';
   markStale(panel, true);
 }
 function esc(s){ return escapeHtml(s==null?'':s); }
@@ -520,19 +520,19 @@ async function loadSystem(){
     $('sysPill').textContent = d.ok ? 'ONLINE' : 'OFFLINE';
     const c = d.counts||{};
     const order = [
-      ['memories','MEM'],['people','ХОРА'],['captures','INBOX'],['transactions','TXN'],
-      ['monitors','MON'],['habits','НАВ'],['documents','DOC']
+      ['memories','MEM'],['people','PEOPLE'],['captures','INBOX'],['transactions','TXN'],
+      ['monitors','MON'],['habits','HAB'],['documents','DOC']
     ];
     let tiles = order.filter(([k])=>k in c).map(([k,l])=>
       `<div class="tile"><div class="n">${esc(c[k])}</div><div class="l">${l}</div></div>`).join('');
     if(typeof d.tools==='number'){
       tiles = `<div class="tile"><div class="n">${esc(d.tools)}</div><div class="l">TOOLS</div></div>` + tiles;
     }
-    $('systemBody').innerHTML = tiles ? `<div class="tiles">${tiles}</div>` : '<div class="empty">няма данни</div>';
+    $('systemBody').innerHTML = tiles ? `<div class="tiles">${tiles}</div>` : '<div class="empty">no data</div>';
   }catch(e){ if(e.message!=='unauthorized') panelError('systemBody','system',e.message); }
 }
 
-/* ----- ДНЕС ----- */
+/* ----- TODAY ----- */
 function eventClass(c){ return ['lesson','university','personal','other'].includes(c)?c:'other'; }
 function timeOf(iso){
   if(!iso) return '';
@@ -547,37 +547,37 @@ async function loadToday(){
     markStale('today', false);
     let html='';
     if(d.agenda_error){
-      html += '<div class="reauth">⚠️ календарът иска re-auth</div>';
+      html += '<div class="reauth">⚠️ calendar needs re-auth</div>';
     }
     const agenda = Array.isArray(d.agenda)?d.agenda:[];
     if(agenda.length){
       html += '<div class="timeline">' + agenda.map(ev=>{
         const cls = eventClass(ev.event_class);
         return `<div class="tl-item ${cls}"><span class="tl-time">⏰ ${esc(timeOf(ev.start))}</span>`+
-               `<span class="tl-sum">${esc(ev.summary||'(без име)')}</span></div>`;
+               `<span class="tl-sum">${esc(ev.summary||'(untitled)')}</span></div>`;
       }).join('') + '</div>';
     } else if(!d.agenda_error){
-      html += '<div class="empty">няма събития днес</div>';
+      html += '<div class="empty">no events today</div>';
     }
     const ddl = Array.isArray(d.deadlines)?d.deadlines:[];
-    html += '<div class="sub-h">КРАЙНИ СРОКОВЕ</div>';
+    html += '<div class="sub-h">DEADLINES</div>';
     if(ddl.length){
       html += ddl.map(x=>{
         const ic = x.kind==='assignment'?'📝':(x.kind==='quiz'?'📋':'🔔');
         const meta = [x.course, x.time_text].filter(Boolean).map(esc).join(' · ');
-        return `<div class="ddl"><span class="ic">${ic}</span><div><div>${esc(x.title||'(без име)')}</div>`+
+        return `<div class="ddl"><span class="ic">${ic}</span><div><div>${esc(x.title||'(untitled)')}</div>`+
                (meta?`<div class="meta">${meta}</div>`:'')+`</div></div>`;
       }).join('');
     } else if(d.deadlines_error){
-      html += '<div class="reauth">⚠️ Moodle недостъпен</div>';
+      html += '<div class="reauth">⚠️ Moodle unreachable</div>';
     } else {
-      html += '<div class="empty">няма крайни срокове</div>';
+      html += '<div class="empty">no deadlines</div>';
     }
     $('todayBody').innerHTML = html;
   }catch(e){ if(e.message!=='unauthorized') panelError('todayBody','today',e.message); }
 }
 
-/* ----- ПАРИ ----- */
+/* ----- MONEY ----- */
 async function loadMoney(){
   try{
     const d = await api('/api/money');
@@ -591,9 +591,9 @@ async function loadMoney(){
     const incPct = total>0 ? (inc/total*100) : 50;
     const expPct = total>0 ? (exp/total*100) : 50;
     let html = `<div class="money-row">`+
-      `<div class="money-big inc"><div class="n">${fmtMoney(inc,cur)}</div><div class="l">приход</div></div>`+
-      `<div class="money-big exp"><div class="n">${fmtMoney(exp,cur)}</div><div class="l">разход</div></div>`+
-      `<div class="money-big net"><div class="n">${fmtMoney(net,cur)}</div><div class="l">нето</div></div></div>`;
+      `<div class="money-big inc"><div class="n">${fmtMoney(inc,cur)}</div><div class="l">income</div></div>`+
+      `<div class="money-big exp"><div class="n">${fmtMoney(exp,cur)}</div><div class="l">expense</div></div>`+
+      `<div class="money-big net"><div class="n">${fmtMoney(net,cur)}</div><div class="l">net</div></div></div>`;
     html += `<div class="split-bar"><div class="inc" style="width:${incPct}%"></div><div class="exp" style="width:${expPct}%"></div></div>`;
     const recent = Array.isArray(d.recent)?d.recent:[];
     if(recent.length){
@@ -605,32 +605,32 @@ async function loadMoney(){
                `<span class="a ${pos?'pos':'neg'}">${fmtMoney(Math.abs(amt),cur)}</span></div>`;
       }).join('');
     } else {
-      html += '<div class="empty">няма транзакции</div>';
+      html += '<div class="empty">no transactions</div>';
     }
     $('moneyBody').innerHTML = html;
   }catch(e){ if(e.message!=='unauthorized') panelError('moneyBody','money',e.message); }
 }
 
-/* ----- НАВИЦИ ----- */
+/* ----- HABITS ----- */
 async function loadHabits(){
   try{
     const d = await api('/api/habits');
     if(d.error){ return panelError('habitsBody','habits',d.error); }
     markStale('habits', false);
     const habits = Array.isArray(d.habits)?d.habits:[];
-    if(!habits.length){ $('habitsBody').innerHTML='<div class="empty">няма навици</div>'; return; }
+    if(!habits.length){ $('habitsBody').innerHTML='<div class="empty">no habits</div>'; return; }
     $('habitsBody').innerHTML = habits.map(h=>{
       const last7 = Array.isArray(h.last7)?h.last7:[];
       let dots='';
       for(let i=0;i<7;i++){ const done = !!last7[i]; dots += `<i class="${done?'done':''}"></i>`; }
-      return `<div class="habit"><span class="name">${esc(h.name||'(навик)')}</span>`+
+      return `<div class="habit"><span class="name">${esc(h.name||'(habit)')}</span>`+
              `<span class="streak">🔥${esc(h.streak||0)}</span>`+
              `<span class="dots7">${dots}</span></div>`;
     }).join('');
   }catch(e){ if(e.message!=='unauthorized') panelError('habitsBody','habits',e.message); }
 }
 
-/* ----- ХОРА ----- */
+/* ----- PEOPLE ----- */
 async function loadPeople(){
   try{
     const d = await api('/api/people');
@@ -642,23 +642,23 @@ async function loadPeople(){
     if(bdays.length){
       html += bdays.map(b=>{
         const days = b.in_days;
-        const when = (days===0)?'днес':((days===1)?'утре':'след '+days+'д');
+        const when = (days===0)?'today':((days===1)?'tomorrow':'in '+days+'d');
         return `<div class="row-item"><span class="ic">🎂</span>`+
                `<span class="main">${esc(b.name||'?')}</span><span class="meta">${esc(when)}</span></div>`;
       }).join('');
     }
     if(stale.length){
       html += stale.map(s=>{
-        const dd = (s.days_since!=null)? s.days_since+'д' : '';
+        const dd = (s.days_since!=null)? s.days_since+'d' : '';
         return `<div class="row-item"><span class="ic">📞</span>`+
-               `<span class="main">потърси ${esc(s.name||'?')}</span><span class="meta">${esc(dd)}</span></div>`;
+               `<span class="main">reach out to ${esc(s.name||'?')}</span><span class="meta">${esc(dd)}</span></div>`;
       }).join('');
     }
-    $('peopleBody').innerHTML = html || '<div class="empty">няма данни</div>';
+    $('peopleBody').innerHTML = html || '<div class="empty">no data</div>';
   }catch(e){ if(e.message!=='unauthorized') panelError('peopleBody','people',e.message); }
 }
 
-/* ----- МОНИТОРИ ----- */
+/* ----- MONITORS ----- */
 function shortTime(iso){
   if(!iso) return '';
   const d=new Date(iso);
@@ -671,10 +671,10 @@ async function loadMonitors(){
     if(d.error){ return panelError('monitorsBody','monitors',d.error); }
     markStale('monitors', false);
     const mons = Array.isArray(d.monitors)?d.monitors:[];
-    if(!mons.length){ $('monitorsBody').innerHTML='<div class="empty">няма монитори</div>'; return; }
+    if(!mons.length){ $('monitorsBody').innerHTML='<div class="empty">no monitors</div>'; return; }
     $('monitorsBody').innerHTML = mons.map(m=>{
       const val = (m.last_value!=null && m.last_value!=='')? m.last_value : '—';
-      return `<div class="row-item"><span class="main">${esc(m.name||'(монитор)')}</span>`+
+      return `<div class="row-item"><span class="main">${esc(m.name||'(monitor)')}</span>`+
              `<span class="mono-val">${esc(val)}</span>`+
              `<span class="meta">${esc(shortTime(m.last_checked_at))}</span></div>`;
     }).join('');
@@ -689,7 +689,7 @@ async function loadCaptures(){
     markStale('captures', false);
     const inbox = Array.isArray(d.inbox)?d.inbox:[];
     $('inboxBadge').textContent = inbox.length;
-    if(!inbox.length){ $('captureBody').innerHTML='<div class="empty">inbox е празен</div>'; return; }
+    if(!inbox.length){ $('captureBody').innerHTML='<div class="empty">inbox is empty</div>'; return; }
     $('captureBody').innerHTML = inbox.map(it=>{
       const kind = it.kind||'note';
       const ic = kind==='url'?'🔗':(kind==='task'?'✅':(kind==='idea'?'💡':'📌'));
