@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S. — BogiAgent</title>
+<style>
+  :root{
+    --bg:#04070d; --cyan:#34e7ff; --cyan-dim:#0e5d6e; --magenta:#ff3cac;
+    --accent:var(--cyan); --accent2:var(--magenta);
+    --text:#cfeefb; --muted:#5d7a8c;
+    --grid:rgba(52,231,255,.07);
+    --panel:rgba(8,18,30,.72); --line:rgba(52,231,255,.18);
+    --ok:#16ff9c; --warn:#ffb347; --bad:#ff5470;
+    --c-lesson:#16ff9c; --c-university:#34e7ff; --c-personal:#ff3cac; --c-other:#8a9bb0;
+  }
+  body.cyber{--accent:#ff3cac; --accent2:#34e7ff; --grid:rgba(255,60,172,.07); --line:rgba(255,60,172,.22)}
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Segoe UI',Rajdhani,system-ui,sans-serif;
+    background:radial-gradient(1200px 700px at 70% -10%,#0a1c2e 0%,var(--bg) 60%),var(--bg);
+    color:var(--text); overflow-x:hidden; min-height:100vh;
+  }
+  .bg-grid{position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
+    background-size:46px 46px;
+    mask-image:radial-gradient(ellipse 80% 70% at 50% 30%,#000 40%,transparent 100%);
+    animation:gridmove 22s linear infinite}
+  @keyframes gridmove{from{background-position:0 0}to{background-position:46px 46px}}
+  .scanline{position:fixed;inset:0;z-index:60;pointer-events:none;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,0) 0,rgba(0,0,0,0) 2px,rgba(0,0,0,.12) 3px);
+    mix-blend-mode:overlay;opacity:.5}
+  .glow-orb{position:fixed;z-index:0;border-radius:50%;filter:blur(90px);opacity:.45;pointer-events:none;transition:transform .3s ease-out}
+  .glow-orb.c{width:420px;height:420px;background:var(--accent);top:-120px;right:-80px}
+  .glow-orb.m{width:360px;height:360px;background:var(--accent2);bottom:-140px;left:-100px;opacity:.3}
+
+  /* boot overlay */
+  #boot{position:fixed;inset:0;z-index:200;background:#02040a;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:18px;transition:opacity .6s ease}
+  #boot.done{opacity:0;pointer-events:none}
+  #boot .bcore{width:90px;height:90px;border-radius:50%;
+    background:radial-gradient(circle,#eafdff,var(--cyan) 50%,var(--cyan-dim));
+    box-shadow:0 0 50px var(--cyan);animation:breathe 1.2s ease-in-out infinite}
+  #bootlog{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--cyan);
+    width:340px;min-height:140px;letter-spacing:1px;line-height:1.7;text-shadow:0 0 8px rgba(52,231,255,.5)}
+  #bootlog .ok{color:var(--ok)}
+  #bootlog .err{color:var(--bad)}
+
+  .wrap{position:relative;z-index:10;max-width:1480px;margin:0 auto;padding:22px 20px 60px}
+  header.topbar{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;
+    border:1px solid var(--line);border-radius:14px;padding:14px 20px;background:var(--panel);backdrop-filter:blur(8px);
+    box-shadow:0 0 40px rgba(52,231,255,.08),inset 0 0 30px rgba(52,231,255,.04)}
+  .brand{display:flex;align-items:center;gap:14px}
+  .brand .mark svg{filter:drop-shadow(0 0 6px var(--accent))}
+  .brand h1{font-size:20px;letter-spacing:5px;font-weight:700;
+    background:linear-gradient(90deg,var(--accent),#fff 60%,var(--accent2));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .brand .sub{font-size:10px;letter-spacing:3px;color:var(--muted)}
+  .top-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+  .clock{font-family:ui-monospace,monospace;text-align:right;font-size:13px;color:var(--accent);letter-spacing:1px}
+  .clock small{display:block;font-size:10px;color:var(--muted);letter-spacing:2px}
+  .pill-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+  .status-pill{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:2px;color:var(--accent);
+    border:1px solid var(--line);border-radius:30px;padding:6px 14px}
+  .status-pill.tools{color:var(--accent2)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 10px var(--ok);animation:pulse 1.6s infinite}
+  .dot.off{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .ghost-btn{cursor:pointer;border:1px solid var(--line);background:rgba(52,231,255,.05);color:var(--accent);
+    border-radius:30px;padding:6px 13px;font-size:11px;letter-spacing:1px;transition:.15s;text-decoration:none;display:inline-block}
+  .ghost-btn:hover{background:var(--accent);color:#04111a;box-shadow:0 0 16px var(--accent)}
+
+  /* main grid: chat stage + HUD panels */
+  .layout{margin-top:20px;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:20px;align-items:start}
+  @media(max-width:1080px){.layout{grid-template-columns:1fr}}
+
+  .stage{position:relative;border:1px solid var(--line);border-radius:16px;background:var(--panel);
+    backdrop-filter:blur(8px);overflow:hidden;display:flex;flex-direction:column;min-height:620px}
+  .corner{position:absolute;width:18px;height:18px;border-color:var(--accent);opacity:.7;z-index:2}
+  .corner.tl{top:8px;left:8px;border-top:2px solid;border-left:2px solid}
+  .corner.tr{top:8px;right:8px;border-top:2px solid;border-right:2px solid}
+  .corner.bl{bottom:8px;left:8px;border-bottom:2px solid;border-left:2px solid}
+  .corner.br{bottom:8px;right:8px;border-bottom:2px solid;border-right:2px solid}
+
+  .reactor-zone{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:22px 20px 12px;border-bottom:1px solid var(--line);position:relative}
+  .reactor{width:128px;height:128px;position:relative;cursor:pointer}
+  .reactor .ring{position:absolute;inset:0;border-radius:50%;border:1px solid var(--accent);opacity:.5}
+  .reactor .r1{animation:spin 8s linear infinite}
+  .reactor .r2{inset:14px;border-style:dashed;border-color:var(--accent2);opacity:.4;animation:spin 6s linear infinite reverse}
+  .reactor .r3{inset:30px;border-color:var(--accent);animation:spin 12s linear infinite}
+  .reactor .core{position:absolute;inset:42px;border-radius:50%;
+    background:radial-gradient(circle,#eafdff 0%,var(--accent) 45%,var(--cyan-dim) 100%);
+    box-shadow:0 0 40px var(--accent),0 0 80px rgba(52,231,255,.5);animation:breathe 2.6s ease-in-out infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes breathe{0%,100%{transform:scale(1);opacity:.92}50%{transform:scale(1.08);opacity:1}}
+  .reactor.thinking .core{animation:breathe .7s ease-in-out infinite;
+    background:radial-gradient(circle,#fff,var(--accent2) 50%,#7a1149);box-shadow:0 0 50px var(--accent2)}
+  .reactor.speaking .core{animation:breathe 1s ease-in-out infinite}
+  .wave{display:flex;align-items:flex-end;gap:3px;height:24px;margin-top:12px}
+  .wave i{width:3px;height:5px;background:var(--accent);border-radius:2px;opacity:.4;transition:height .12s ease}
+  .wave.active i{opacity:1;box-shadow:0 0 8px var(--accent)}
+  .tag{margin-top:8px;font-size:11px;letter-spacing:4px;color:var(--muted)}
+  .tag b{color:var(--accent)}
+
+  .chat{flex:1;display:flex;flex-direction:column;min-height:0}
+  .messages{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;max-height:46vh}
+  .messages::-webkit-scrollbar{width:6px}
+  .messages::-webkit-scrollbar-thumb{background:var(--cyan-dim);border-radius:3px}
+  .msg{max-width:88%;padding:11px 15px;border-radius:12px;font-size:14px;line-height:1.5;animation:rise .35s ease}
+  @keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .msg.user{align-self:flex-end;background:linear-gradient(135deg,#1a2c44,#13202f);border:1px solid var(--line);color:#e8f6ff;white-space:pre-wrap}
+  .msg.bot{align-self:flex-start;background:rgba(52,231,255,.07);border:1px solid var(--line);
+    border-left:3px solid var(--accent);color:var(--text);box-shadow:0 0 24px rgba(52,231,255,.06)}
+  .msg.bot .who{display:block;font-size:9px;letter-spacing:3px;color:var(--accent);margin-bottom:5px}
+  .msg.bot .body{white-space:pre-wrap;word-wrap:break-word}
+  .msg.bot .body code{background:rgba(52,231,255,.12);border:1px solid var(--line);border-radius:4px;
+    padding:1px 5px;font-family:ui-monospace,monospace;font-size:12px;color:var(--accent)}
+  .msg.bot .body strong{color:#fff}
+  .cursor-blink{display:inline-block;width:7px;background:var(--accent);margin-left:1px;animation:blinkc .6s step-end infinite}
+  @keyframes blinkc{50%{opacity:0}}
+  .typing{display:flex;gap:5px;align-items:center}
+  .typing span{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:blink 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+  @keyframes blink{0%,100%{opacity:.25;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 12px}
+  .chip{cursor:pointer;font-size:11px;letter-spacing:.5px;padding:7px 12px;border-radius:30px;
+    border:1px solid var(--line);color:var(--accent);background:rgba(52,231,255,.05);transition:.15s}
+  .chip:hover{background:var(--accent);color:#04111a;box-shadow:0 0 16px var(--accent)}
+
+  .composer{display:flex;gap:10px;padding:14px 16px;border-top:1px solid var(--line);background:rgba(4,9,16,.6)}
+  .composer input{flex:1;background:rgba(0,0,0,.35);border:1px solid var(--line);border-radius:10px;
+    padding:12px 14px;color:var(--text);font-size:14px;outline:none;font-family:inherit}
+  .composer input:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(52,231,255,.12)}
+  .send{border:none;cursor:pointer;border-radius:10px;padding:0 20px;font-weight:700;letter-spacing:2px;font-size:12px;
+    color:#04111a;background:linear-gradient(135deg,var(--accent),#7af0ff);box-shadow:0 0 20px rgba(52,231,255,.4);transition:.15s}
+  .send:hover{transform:translateY(-1px);box-shadow:0 0 30px rgba(52,231,255,.7)}
+  .send:disabled{opacity:.4;cursor:not-allowed}
+
+  /* HUD panels */
+  .hud{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:560px){.hud{grid-template-columns:1fr}}
+  .card{border:1px solid var(--line);border-radius:14px;background:var(--panel);backdrop-filter:blur(8px);padding:15px 16px;position:relative;overflow:hidden}
+  .card.span2{grid-column:1 / -1}
+  .card h3{font-size:11px;letter-spacing:3px;color:var(--muted);margin-bottom:12px;font-weight:600;
+    display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .card h3 .t{color:var(--accent);display:flex;align-items:center;gap:7px}
+  .live{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);animation:pulse 1.6s infinite;flex:0 0 auto}
+  .live.stale{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+  .empty{font-size:12px;color:var(--muted);letter-spacing:.5px;padding:6px 0}
+  .err{font-size:11px;color:var(--bad);letter-spacing:.5px;padding:6px 0}
+
+  /* stat tiles */
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(72px,1fr));gap:9px}
+  .tile{border:1px solid var(--line);border-radius:9px;padding:9px 8px;text-align:center;background:rgba(52,231,255,.04)}
+  .tile .n{font-size:19px;font-weight:700;color:var(--accent);font-family:ui-monospace,monospace}
+  .tile .l{font-size:9px;letter-spacing:1px;color:var(--muted);margin-top:3px;text-transform:uppercase}
+
+  /* timeline */
+  .timeline{display:flex;flex-direction:column;gap:8px}
+  .tl-item{display:flex;gap:10px;align-items:flex-start;font-size:13px;padding-left:10px;border-left:2px solid var(--c-other)}
+  .tl-item.lesson{border-color:var(--c-lesson)} .tl-item.university{border-color:var(--c-university)}
+  .tl-item.personal{border-color:var(--c-personal)} .tl-item.other{border-color:var(--c-other)}
+  .tl-time{font-family:ui-monospace,monospace;font-size:12px;color:var(--accent);flex:0 0 auto;min-width:44px}
+  .tl-sum{color:var(--text);line-height:1.35}
+  .reauth{font-size:11px;color:var(--warn);letter-spacing:.5px;margin-bottom:8px;
+    border:1px dashed var(--warn);border-radius:7px;padding:5px 8px}
+  .sub-h{font-size:10px;letter-spacing:2px;color:var(--muted);margin:12px 0 7px;text-transform:uppercase}
+  .ddl{display:flex;gap:9px;align-items:flex-start;font-size:13px;margin-bottom:7px}
+  .ddl .ic{flex:0 0 auto}
+  .ddl .meta{color:var(--muted);font-size:11px}
+
+  /* money */
+  .money-row{display:flex;gap:10px;margin-bottom:12px}
+  .money-big{flex:1;border:1px solid var(--line);border-radius:9px;padding:9px;text-align:center;background:rgba(52,231,255,.04)}
+  .money-big .n{font-size:17px;font-weight:700;font-family:ui-monospace,monospace}
+  .money-big.inc .n{color:var(--ok)} .money-big.exp .n{color:var(--bad)} .money-big.net .n{color:var(--accent)}
+  .money-big .l{font-size:9px;letter-spacing:1px;color:var(--muted);margin-top:3px;text-transform:uppercase}
+  .split-bar{height:8px;border-radius:5px;overflow:hidden;display:flex;background:rgba(255,255,255,.06);margin-bottom:12px}
+  .split-bar .inc{background:linear-gradient(90deg,var(--ok),#0ea968);box-shadow:0 0 8px var(--ok)}
+  .split-bar .exp{background:linear-gradient(90deg,#b3324a,var(--bad));box-shadow:0 0 8px var(--bad)}
+  .recent-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid rgba(52,231,255,.06)}
+  .recent-row .a{font-family:ui-monospace,monospace}
+  .recent-row .a.pos{color:var(--ok)} .recent-row .a.neg{color:var(--bad)}
+  .recent-row .d{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60%}
+
+  /* habits */
+  .habit{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:13px}
+  .habit .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .habit .streak{color:var(--warn);font-size:12px;font-family:ui-monospace,monospace;flex:0 0 auto}
+  .dots7{display:flex;gap:4px;flex:0 0 auto}
+  .dots7 i{width:11px;height:11px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid var(--line)}
+  .dots7 i.done{background:var(--ok);box-shadow:0 0 7px var(--ok);border-color:var(--ok)}
+
+  /* people / monitors / inbox */
+  .row-item{display:flex;gap:9px;align-items:baseline;font-size:13px;padding:5px 0;border-bottom:1px solid rgba(52,231,255,.06)}
+  .row-item .ic{flex:0 0 auto}
+  .row-item .main{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row-item .meta{color:var(--muted);font-size:11px;flex:0 0 auto}
+  .badge{font-size:10px;font-family:ui-monospace,monospace;color:#04111a;background:var(--accent);
+    border-radius:20px;padding:1px 9px;font-weight:700}
+  .mono-val{font-family:ui-monospace,monospace;color:var(--accent)}
+
+  footer{text-align:center;margin-top:28px;font-size:11px;letter-spacing:2px;color:var(--muted)}
+  footer b{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+<div class="glow-orb c" id="orbC"></div>
+<div class="glow-orb m" id="orbM"></div>
+<div class="scanline"></div>
+
+<!-- BOOT -->
+<div id="boot">
+  <div class="bcore"></div>
+  <div id="bootlog"></div>
+</div>
+
+<div class="wrap">
+  <header class="topbar">
+    <div class="brand">
+      <div class="mark">
+        <svg width="38" height="38" viewBox="0 0 38 38" fill="none">
+          <circle cx="19" cy="19" r="17" stroke="currentColor" stroke-width="1.4" opacity=".5" style="color:var(--accent)"/>
+          <circle cx="19" cy="19" r="11" stroke="var(--accent2)" stroke-width="1" stroke-dasharray="3 3" opacity=".7"/>
+          <circle cx="19" cy="19" r="5" fill="var(--accent)"/>
+        </svg>
+      </div>
+      <div>
+        <h1>J.A.R.V.I.S.</h1>
+        <div class="sub">BOGIAGENT · LIFE-OS COCKPIT</div>
+      </div>
+    </div>
+    <div class="top-right">
+      <div class="clock"><span id="time">--:--:--</span><small id="date">---</small></div>
+      <button class="ghost-btn" id="themeBtn">THEME</button>
+      <div class="pill-row">
+        <div class="status-pill"><span class="dot off" id="onlineDot"></span> <span id="onlineTxt">CONNECTING</span></div>
+        <div class="status-pill tools"><span id="toolsTxt">-- tools</span></div>
+      </div>
+    </div>
+  </header>
+
+  <section class="layout">
+    <!-- CHAT STAGE -->
+    <div class="stage">
+      <span class="corner tl"></span><span class="corner tr"></span>
+      <span class="corner bl"></span><span class="corner br"></span>
+
+      <div class="reactor-zone">
+        <div class="reactor" id="reactor" title="Core">
+          <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+          <div class="core"></div>
+        </div>
+        <div class="wave" id="wave"></div>
+        <div class="tag">STATUS: <b id="statusTag">BOOTING</b></div>
+      </div>
+
+      <div class="chat">
+        <div class="messages" id="messages"></div>
+        <div class="chips" id="chips">
+          <span class="chip">Какво имам днес?</span>
+          <span class="chip">Колко уроци изкарах този месец?</span>
+          <span class="chip">Кого да потърся?</span>
+          <span class="chip">Покажи навиците</span>
+          <span class="chip">Какво има в inbox-а?</span>
+        </div>
+        <form class="composer" id="composer" autocomplete="off">
+          <input id="input" placeholder="Кажи на Джарвис..." />
+          <button type="submit" class="send" id="sendBtn">SEND</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- HUD PANELS -->
+    <div class="hud">
+      <!-- SYSTEM -->
+      <div class="card" data-panel="system">
+        <h3><span class="t"><span class="live"></span>SYSTEM</span><span id="sysPill" class="mono-val">--</span></h3>
+        <div id="systemBody"><div class="empty">зареждане…</div></div>
+      </div>
+
+      <!-- ДНЕС -->
+      <div class="card span2" data-panel="today">
+        <h3><span class="t"><span class="live"></span>ДНЕС</span></h3>
+        <div id="todayBody"><div class="empty">зареждане…</div></div>
+      </div>
+
+      <!-- ПАРИ -->
+      <div class="card" data-panel="money">
+        <h3><span class="t"><span class="live"></span>ПАРИ</span></h3>
+        <div id="moneyBody"><div class="empty">зареждане…</div></div>
+      </div>
+
+      <!-- НАВИЦИ -->
+      <div class="card" data-panel="habits">
+        <h3><span class="t"><span class="live"></span>НАВИЦИ</span></h3>
+        <div id="habitsBody"><div class="empty">зареждане…</div></div>
+      </div>
+
+      <!-- ХОРА -->
+      <div class="card" data-panel="people">
+        <h3><span class="t"><span class="live"></span>ХОРА</span></h3>
+        <div id="peopleBody"><div class="empty">зареждане…</div></div>
+      </div>
+
+      <!-- МОНИТОРИ -->
+      <div class="card" data-panel="monitors">
+        <h3><span class="t"><span class="live"></span>МОНИТОРИ</span></h3>
+        <div id="monitorsBody"><div class="empty">зареждане…</div></div>
+      </div>
+
+      <!-- INBOX -->
+      <div class="card span2" data-panel="captures">
+        <h3><span class="t"><span class="live"></span>INBOX</span><span id="inboxBadge" class="badge">0</span></h3>
+        <div id="captureBody"><div class="empty">зареждане…</div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer>J.A.R.V.I.S. · LIVE DEMO — fictional data · <b id="upFoot">uptime 00:00</b></footer>
+</div>
+
+<script>
+/* DEMO MODE — static GitHub Pages build. All data below is fictional. */
+(function(){
+  const DATA = {"/api/status": {"ok": true, "tools": 34, "counts": {"memories": 218, "people": 12, "captures": 3, "transactions": 57, "monitors": 2, "habits": 3, "documents": 142}}, "/api/today": {"agenda": [{"start": "2026-06-11T09:00", "summary": "Лекция — Бази данни", "event_class": "university"}, {"start": "2026-06-11T14:00", "summary": "Урок по математика", "event_class": "lesson"}, {"start": "2026-06-11T19:00", "summary": "Фитнес", "event_class": "personal"}], "deadlines": [{"kind": "assignment", "title": "Домашно 3 — нормални форми", "course": "Бази данни", "time_text": "утре, 23:59"}, {"kind": "quiz", "title": "Тест — Java колекции", "course": "ООП практикум", "time_text": "след 3 дни"}]}, "/api/money": {"month": {"currency": "лв", "income_total": 840.0, "expense_total": 412.5, "net": 427.5}, "recent": [{"amount": 60, "kind": "income", "description": "Урок — математика"}, {"amount": -45, "kind": "expense", "description": "Учебник по статистика"}, {"amount": -18.9, "kind": "expense", "description": "Обяд"}]}, "/api/habits": {"habits": [{"name": "Учене 2ч", "streak": 12, "last7": [true, true, true, true, false, true, true]}, {"name": "Фитнес", "streak": 4, "last7": [false, true, false, true, true, false, true]}, {"name": "Четене", "streak": 7, "last7": [true, true, true, true, true, true, true]}]}, "/api/people": {"birthdays": [{"name": "Мартин", "in_days": 2}], "stale": [{"name": "Виктор", "days_since": 21}]}, "/api/monitors": {"monitors": [{"name": "GPU цена — RTX 4070", "last_value": "1099 лв", "last_checked_at": "2026-06-11T08:30:00"}, {"name": "Сесия — график", "last_value": "без промяна", "last_checked_at": "2026-06-11T07:00:00"}]}, "/api/captures": {"inbox": [{"kind": "idea", "content": "Сравни pgvector срещу Qdrant за RAG"}, {"kind": "task", "content": "Запиши се за изпита по статистика"}, {"kind": "url", "content": "fastapi.tiangolo.com/advanced"}]}, "/api/brief": {"text": "Добро утро! ☀️ Днес имаш **лекция по Бази данни в 09:00** и урок в 14:00. ⏰ Домашно 3 по Бази данни е до утре 23:59 — остава ти теорията за BCNF. 🔥 12-дневна серия учене — дръж темпото."}};
+  const REPLIES = [["изпит|бази данни|повторя|научи", "Изпитът по **Бази данни** е на 24 юни, 10:00. По материалите от индекса препоръчвам да повториш: нормални форми (лекция 7), транзакции и ACID (лекция 9), индекси и B-дървета (лекция 10). Домашно 3 покрива същия материал — започни от него. Да ти направя ли план за повторение в календара?"], ["план|календар|повторение|събитие|запази", "Готово — предлагам 3 сесии за повторение: четвъртък 18:00 (нормални форми), петък 17:00 (транзакции), неделя 10:00 (индекси). Събитията са в **approval queue** — потвърди и ги записвам в Google Calendar. ✅"], ["пари(?![а-я])|разход|приход|бюджет|похарчи", "Този месец: **840 лв** приход срещу **412.50 лв** разход → **+427.50 лв** нето. Най-голям разход: учебник по статистика (45 лв). Приходът е от 7 урока по математика."], ["запомни|памет|спомни", "Записах го в дългосрочната памет (namespace `study/databases`), с dedup срещу 218-те съществуващи спомена. Ще го извадя сам, когато стане релевантно."], ["здравей|кой си|какво можеш|помощ", "Здравей! Аз съм J.A.R.V.I.S. — личен Life-OS агент с **34 инструмента**: календар, Moodle крайни срокове, RAG търсене в лекциите, финанси, навици, хора, монитори и дългосрочна памет. Питай ме нещо от панелите вдясно."]].map(([re, text]) => [new RegExp(re, 'i'), text]);
+  const DEFAULT_REPLY = "Това е **статично демо** с измислени данни — тук отговарям само на няколко теми (изпити, план, пари, памет). Истинският агент върти същия UI върху жив backend: Pydantic AI + Postgres/pgvector + Google Calendar + Moodle. Кодът е в репото. 🙂";
+  const json = obj => new Response(JSON.stringify(obj), {status:200, headers:{'Content-Type':'application/json'}});
+  const realFetch = window.fetch.bind(window);
+  window.fetch = function(path, opts){
+    const p = String(path);
+    if(p.indexOf('/api/chat') !== -1){
+      let text = '';
+      try{ text = JSON.parse((opts||{}).body).text || ''; }catch(e){}
+      const hit = REPLIES.find(([re]) => re.test(text));
+      const reply = hit ? hit[1] : DEFAULT_REPLY;
+      return new Promise(res => setTimeout(() => res(json({reply})), 700 + Math.random()*600));
+    }
+    for(const key in DATA){
+      if(p.indexOf(key) !== -1) return Promise.resolve(json(DATA[key]));
+    }
+    return realFetch(path, opts);
+  };
+})();
+</script>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);
+const messages=$('messages'), form=$('composer'), input=$('input'),
+      reactor=$('reactor'), statusTag=$('statusTag'), wave=$('wave'), sendBtn=$('sendBtn');
+
+/* ---------- API helper (auth-aware) ---------- */
+async function api(path, opts){
+  const res = await fetch(path, Object.assign({credentials:'same-origin'}, opts||{}));
+  if(res.status===401){ location.href='/login'; throw new Error('unauthorized'); }
+  return res.json();
+}
+
+/* ---------- safe markdown render (escape FIRST, then mark up) ---------- */
+function escapeHtml(s){
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+function renderMarkdown(text){
+  // escape everything up front, then apply a tiny safe markup pass
+  let s = escapeHtml(text);
+  // `code`  (apply before bold so backticks win)
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // **bold**
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return s; // whitespace/newlines preserved by CSS white-space:pre-wrap
+}
+
+/* ---------- boot sequence ---------- */
+const bootLines=[
+  'Initializing core systems...',
+  'Mounting Life-OS modules... <span class="ok">OK</span>',
+  'Linking agent runtime... <span class="ok">OK</span>',
+  'Establishing secure session... <span class="ok">OK</span>',
+];
+let bi=0;
+function bootStep(){
+  if(bi<bootLines.length){
+    $('bootlog').innerHTML+=bootLines[bi]+'<br>'; bi++;
+    setTimeout(bootStep, 320);
+  } else {
+    setTimeout(()=>{ $('boot').classList.add('done'); startup(); }, 350);
+  }
+}
+bootStep();
+
+/* ---------- waveform bars ---------- */
+for(let i=0;i<22;i++){ wave.appendChild(document.createElement('i')); }
+const waveBars=[...wave.children];
+let waveTimer=null;
+function waveStart(){ wave.classList.add('active'); clearInterval(waveTimer);
+  waveTimer=setInterval(()=>waveBars.forEach(b=>b.style.height=(5+Math.random()*20)+'px'),100); }
+function waveStop(){ clearInterval(waveTimer); wave.classList.remove('active'); waveBars.forEach(b=>b.style.height='5px'); }
+
+/* ---------- messaging + typewriter ---------- */
+function addUser(text){
+  const el=document.createElement('div'); el.className='msg user'; el.textContent=text;
+  messages.appendChild(el); messages.scrollTop=messages.scrollHeight;
+}
+function typeBot(text){
+  reactor.classList.remove('thinking'); reactor.classList.add('speaking');
+  statusTag.textContent='RESPONDING'; waveStart();
+  const el=document.createElement('div'); el.className='msg bot';
+  el.innerHTML='<span class="who">JARVIS</span><span class="body"></span><span class="cursor-blink">&nbsp;</span>';
+  messages.appendChild(el);
+  const body=el.querySelector('.body'), cur=el.querySelector('.cursor-blink');
+  let i=0;
+  (function step(){
+    if(i<text.length){
+      // grow plain text live; re-render markdown each tick on the substring so it stays safe
+      body.innerHTML=renderMarkdown(text.slice(0,i+1));
+      i++; messages.scrollTop=messages.scrollHeight;
+      setTimeout(step, 10+Math.random()*16);
+    } else {
+      body.innerHTML=renderMarkdown(text);
+      cur.remove(); waveStop(); reactor.classList.remove('speaking');
+      statusTag.textContent='AWAITING COMMAND';
+    }
+  })();
+}
+function showTyping(){
+  reactor.classList.add('thinking'); statusTag.textContent='PROCESSING...';
+  const el=document.createElement('div'); el.className='msg bot';
+  el.innerHTML='<span class="who">JARVIS</span><div class="typing"><span></span><span></span><span></span></div>';
+  messages.appendChild(el); messages.scrollTop=messages.scrollHeight; return el;
+}
+
+/* ---------- chat ---------- */
+let busy=false;
+async function sendChat(text){
+  if(busy) return;
+  busy=true; sendBtn.disabled=true;
+  addUser(text);
+  const tp=showTyping();
+  try{
+    const data = await api('/api/chat', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({text})
+    });
+    tp.remove();
+    if(data && data.reply){ typeBot(data.reply); }
+    else if(data && data.error){ typeBot('⚠️ '+data.error); }
+    else { typeBot('⚠️ Празен отговор.'); }
+  }catch(e){
+    tp.remove();
+    if(e.message!=='unauthorized'){
+      reactor.classList.remove('thinking'); statusTag.textContent='AWAITING COMMAND';
+      typeBot('⚠️ Връзката с агента се разпадна.');
+    }
+  }finally{
+    busy=false; sendBtn.disabled=false;
+  }
+}
+
+form.addEventListener('submit',e=>{
+  e.preventDefault(); const v=input.value.trim(); if(!v||busy)return;
+  input.value=''; sendChat(v);
+});
+$('chips').addEventListener('click',e=>{
+  if(e.target.classList.contains('chip')&&!busy){ sendChat(e.target.textContent); }
+});
+$('themeBtn').addEventListener('click',()=>document.body.classList.toggle('cyber'));
+
+/* ---------- clock + uptime ---------- */
+const t0=Date.now();
+function tick(){
+  const d=new Date();
+  $('time').textContent=d.toLocaleTimeString('en-GB');
+  $('date').textContent=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+  const up=Math.floor((Date.now()-t0)/1000);
+  $('upFoot').textContent='uptime '+String(Math.floor(up/60)).padStart(2,'0')+':'+String(up%60).padStart(2,'0');
+}
+setInterval(tick,1000); tick();
+
+/* ---------- mouse parallax glow ---------- */
+window.addEventListener('mousemove',e=>{
+  const x=(e.clientX/window.innerWidth-.5), y=(e.clientY/window.innerHeight-.5);
+  $('orbC').style.transform=`translate(${x*40}px,${y*40}px)`;
+  $('orbM').style.transform=`translate(${-x*40}px,${-y*40}px)`;
+});
+
+/* ============================================================
+   HUD PANELS — each fetches on load + re-polls every 60s
+   ============================================================ */
+function markStale(panel, stale){
+  const live = document.querySelector('.card[data-panel="'+panel+'"] .live');
+  if(live) live.classList.toggle('stale', !!stale);
+}
+function panelError(elId, panel, msg){
+  $(elId).innerHTML='<div class="err">грешка: '+escapeHtml(msg||'няма връзка')+'</div>';
+  markStale(panel, true);
+}
+function esc(s){ return escapeHtml(s==null?'':s); }
+function fmtMoney(n, cur){
+  const v = (typeof n==='number') ? n.toFixed(2) : (n||'0');
+  return v + (cur? ' '+cur : '');
+}
+
+/* ----- SYSTEM ----- */
+async function loadSystem(){
+  try{
+    const d = await api('/api/status');
+    if(d.error){ return panelError('systemBody','system',d.error); }
+    markStale('system', !d.ok);
+    // header pills
+    $('onlineDot').classList.toggle('off', !d.ok);
+    $('onlineTxt').textContent = d.ok ? 'ONLINE' : 'OFFLINE';
+    if(typeof d.tools==='number'){ $('toolsTxt').textContent = d.tools+' tools'; }
+    $('sysPill').textContent = d.ok ? 'ONLINE' : 'OFFLINE';
+    const c = d.counts||{};
+    const order = [
+      ['memories','MEM'],['people','ХОРА'],['captures','INBOX'],['transactions','TXN'],
+      ['monitors','MON'],['habits','НАВ'],['documents','DOC']
+    ];
+    let tiles = order.filter(([k])=>k in c).map(([k,l])=>
+      `<div class="tile"><div class="n">${esc(c[k])}</div><div class="l">${l}</div></div>`).join('');
+    if(typeof d.tools==='number'){
+      tiles = `<div class="tile"><div class="n">${esc(d.tools)}</div><div class="l">TOOLS</div></div>` + tiles;
+    }
+    $('systemBody').innerHTML = tiles ? `<div class="tiles">${tiles}</div>` : '<div class="empty">няма данни</div>';
+  }catch(e){ if(e.message!=='unauthorized') panelError('systemBody','system',e.message); }
+}
+
+/* ----- ДНЕС ----- */
+function eventClass(c){ return ['lesson','university','personal','other'].includes(c)?c:'other'; }
+function timeOf(iso){
+  if(!iso) return '';
+  const m = String(iso).match(/T(\d{2}:\d{2})/);
+  if(m) return m[1];
+  const d=new Date(iso); return isNaN(d)?'':d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+async function loadToday(){
+  try{
+    const d = await api('/api/today');
+    if(d.error){ return panelError('todayBody','today',d.error); }
+    markStale('today', false);
+    let html='';
+    if(d.agenda_error){
+      html += '<div class="reauth">⚠️ календарът иска re-auth</div>';
+    }
+    const agenda = Array.isArray(d.agenda)?d.agenda:[];
+    if(agenda.length){
+      html += '<div class="timeline">' + agenda.map(ev=>{
+        const cls = eventClass(ev.event_class);
+        return `<div class="tl-item ${cls}"><span class="tl-time">⏰ ${esc(timeOf(ev.start))}</span>`+
+               `<span class="tl-sum">${esc(ev.summary||'(без име)')}</span></div>`;
+      }).join('') + '</div>';
+    } else if(!d.agenda_error){
+      html += '<div class="empty">няма събития днес</div>';
+    }
+    const ddl = Array.isArray(d.deadlines)?d.deadlines:[];
+    html += '<div class="sub-h">КРАЙНИ СРОКОВЕ</div>';
+    if(ddl.length){
+      html += ddl.map(x=>{
+        const ic = x.kind==='assignment'?'📝':(x.kind==='quiz'?'📋':'🔔');
+        const meta = [x.course, x.time_text].filter(Boolean).map(esc).join(' · ');
+        return `<div class="ddl"><span class="ic">${ic}</span><div><div>${esc(x.title||'(без име)')}</div>`+
+               (meta?`<div class="meta">${meta}</div>`:'')+`</div></div>`;
+      }).join('');
+    } else if(d.deadlines_error){
+      html += '<div class="reauth">⚠️ Moodle недостъпен</div>';
+    } else {
+      html += '<div class="empty">няма крайни срокове</div>';
+    }
+    $('todayBody').innerHTML = html;
+  }catch(e){ if(e.message!=='unauthorized') panelError('todayBody','today',e.message); }
+}
+
+/* ----- ПАРИ ----- */
+async function loadMoney(){
+  try{
+    const d = await api('/api/money');
+    if(d.error){ return panelError('moneyBody','money',d.error); }
+    markStale('money', false);
+    const m = d.month||{};
+    const cur = m.currency||'';
+    const inc = +m.income_total||0, exp = +m.expense_total||0;
+    const net = (m.net!=null)? +m.net : (inc-exp);
+    const total = inc+exp;
+    const incPct = total>0 ? (inc/total*100) : 50;
+    const expPct = total>0 ? (exp/total*100) : 50;
+    let html = `<div class="money-row">`+
+      `<div class="money-big inc"><div class="n">${fmtMoney(inc,cur)}</div><div class="l">приход</div></div>`+
+      `<div class="money-big exp"><div class="n">${fmtMoney(exp,cur)}</div><div class="l">разход</div></div>`+
+      `<div class="money-big net"><div class="n">${fmtMoney(net,cur)}</div><div class="l">нето</div></div></div>`;
+    html += `<div class="split-bar"><div class="inc" style="width:${incPct}%"></div><div class="exp" style="width:${expPct}%"></div></div>`;
+    const recent = Array.isArray(d.recent)?d.recent:[];
+    if(recent.length){
+      html += recent.map(r=>{
+        const amt = +r.amount||0;
+        const pos = (r.kind==='income') || amt>0;
+        const desc = r.description||r.category||r.note||'—';
+        return `<div class="recent-row"><span class="d">${esc(desc)}</span>`+
+               `<span class="a ${pos?'pos':'neg'}">${fmtMoney(Math.abs(amt),cur)}</span></div>`;
+      }).join('');
+    } else {
+      html += '<div class="empty">няма транзакции</div>';
+    }
+    $('moneyBody').innerHTML = html;
+  }catch(e){ if(e.message!=='unauthorized') panelError('moneyBody','money',e.message); }
+}
+
+/* ----- НАВИЦИ ----- */
+async function loadHabits(){
+  try{
+    const d = await api('/api/habits');
+    if(d.error){ return panelError('habitsBody','habits',d.error); }
+    markStale('habits', false);
+    const habits = Array.isArray(d.habits)?d.habits:[];
+    if(!habits.length){ $('habitsBody').innerHTML='<div class="empty">няма навици</div>'; return; }
+    $('habitsBody').innerHTML = habits.map(h=>{
+      const last7 = Array.isArray(h.last7)?h.last7:[];
+      let dots='';
+      for(let i=0;i<7;i++){ const done = !!last7[i]; dots += `<i class="${done?'done':''}"></i>`; }
+      return `<div class="habit"><span class="name">${esc(h.name||'(навик)')}</span>`+
+             `<span class="streak">🔥${esc(h.streak||0)}</span>`+
+             `<span class="dots7">${dots}</span></div>`;
+    }).join('');
+  }catch(e){ if(e.message!=='unauthorized') panelError('habitsBody','habits',e.message); }
+}
+
+/* ----- ХОРА ----- */
+async function loadPeople(){
+  try{
+    const d = await api('/api/people');
+    if(d.error){ return panelError('peopleBody','people',d.error); }
+    markStale('people', false);
+    const bdays = Array.isArray(d.birthdays)?d.birthdays:[];
+    const stale = Array.isArray(d.stale)?d.stale:[];
+    let html='';
+    if(bdays.length){
+      html += bdays.map(b=>{
+        const days = b.in_days;
+        const when = (days===0)?'днес':((days===1)?'утре':'след '+days+'д');
+        return `<div class="row-item"><span class="ic">🎂</span>`+
+               `<span class="main">${esc(b.name||'?')}</span><span class="meta">${esc(when)}</span></div>`;
+      }).join('');
+    }
+    if(stale.length){
+      html += stale.map(s=>{
+        const dd = (s.days_since!=null)? s.days_since+'д' : '';
+        return `<div class="row-item"><span class="ic">📞</span>`+
+               `<span class="main">потърси ${esc(s.name||'?')}</span><span class="meta">${esc(dd)}</span></div>`;
+      }).join('');
+    }
+    $('peopleBody').innerHTML = html || '<div class="empty">няма данни</div>';
+  }catch(e){ if(e.message!=='unauthorized') panelError('peopleBody','people',e.message); }
+}
+
+/* ----- МОНИТОРИ ----- */
+function shortTime(iso){
+  if(!iso) return '';
+  const d=new Date(iso);
+  if(isNaN(d)) return String(iso);
+  return d.toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+}
+async function loadMonitors(){
+  try{
+    const d = await api('/api/monitors');
+    if(d.error){ return panelError('monitorsBody','monitors',d.error); }
+    markStale('monitors', false);
+    const mons = Array.isArray(d.monitors)?d.monitors:[];
+    if(!mons.length){ $('monitorsBody').innerHTML='<div class="empty">няма монитори</div>'; return; }
+    $('monitorsBody').innerHTML = mons.map(m=>{
+      const val = (m.last_value!=null && m.last_value!=='')? m.last_value : '—';
+      return `<div class="row-item"><span class="main">${esc(m.name||'(монитор)')}</span>`+
+             `<span class="mono-val">${esc(val)}</span>`+
+             `<span class="meta">${esc(shortTime(m.last_checked_at))}</span></div>`;
+    }).join('');
+  }catch(e){ if(e.message!=='unauthorized') panelError('monitorsBody','monitors',e.message); }
+}
+
+/* ----- INBOX ----- */
+async function loadCaptures(){
+  try{
+    const d = await api('/api/captures');
+    if(d.error){ return panelError('captureBody','captures',d.error); }
+    markStale('captures', false);
+    const inbox = Array.isArray(d.inbox)?d.inbox:[];
+    $('inboxBadge').textContent = inbox.length;
+    if(!inbox.length){ $('captureBody').innerHTML='<div class="empty">inbox е празен</div>'; return; }
+    $('captureBody').innerHTML = inbox.map(it=>{
+      const kind = it.kind||'note';
+      const ic = kind==='url'?'🔗':(kind==='task'?'✅':(kind==='idea'?'💡':'📌'));
+      const content = it.content || it.url || it.text || '—';
+      return `<div class="row-item"><span class="ic">${ic}</span>`+
+             `<span class="main">${esc(content)}</span><span class="meta">${esc(kind)}</span></div>`;
+    }).join('');
+  }catch(e){ if(e.message!=='unauthorized') panelError('captureBody','captures',e.message); }
+}
+
+/* ---------- panel orchestration ---------- */
+const panels=[loadSystem, loadToday, loadMoney, loadHabits, loadPeople, loadMonitors, loadCaptures];
+function refreshPanels(){ panels.forEach(fn=>fn()); }
+
+/* ---------- startup after boot ---------- */
+async function startup(){
+  statusTag.textContent='SYNCING';
+  refreshPanels();
+  setInterval(refreshPanels, 60000);
+  // first JARVIS message = the real daily brief
+  try{
+    const d = await api('/api/brief');
+    if(d && d.text){ typeBot(d.text); }
+    else if(d && d.error){ typeBot('⚠️ '+d.error); statusTag.textContent='AWAITING COMMAND'; }
+    else { statusTag.textContent='AWAITING COMMAND'; }
+  }catch(e){
+    if(e.message!=='unauthorized'){ statusTag.textContent='AWAITING COMMAND'; }
+  }
+}
+</script>
+</body>
+</html>
