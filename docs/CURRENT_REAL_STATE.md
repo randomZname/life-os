@@ -23,7 +23,7 @@ Telegram (python-telegram-bot, long-poll)
         │  wrap_untrusted() around external text
         ▼
    LiteLLM proxy (docker, :4000)             ← model-agnostic; aliases cheap/smart/premium
-        │  Claude via claude.ai Pro OAuth (+ OpenAI fallback)
+        │  Claude via Anthropic API (+ OpenAI fallback)
         ▼
    Postgres 16 + pgvector (docker, :5432)    ← state, memory, documents, approvals
    + Google Calendar API  + FMI Moodle (Playwright)  + Obsidian vault (local files)

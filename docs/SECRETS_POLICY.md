@@ -24,7 +24,7 @@ secrets-management design, sized down for a solo personal project.
 
 | Key | Purpose |
 |---|---|
-| `ANTHROPIC_API_KEY` / claude.ai OAuth | Claude via LiteLLM |
+| `ANTHROPIC_API_KEY` | Claude via LiteLLM |
 | `LITELLM_MASTER_KEY` | LiteLLM proxy auth |
 | `POSTGRES_PASSWORD` | DB |
 | `TELEGRAM_BOT_TOKEN` | Telegram bot |
